@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/333402/57ca885568d340538807c36ed3b874ac
+bundleId: https://api.rpubs.com/api/v1/document/333402/57ca885568d340538807c36ed3b874ac
+url: http://rpubs.com/jawlik/333402
+when: 1511484879.88728

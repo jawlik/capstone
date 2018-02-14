@@ -1,0 +1,12 @@
+name: capstone
+title: capstone
+username:
+account: jawlik
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 281179
+bundleId: 1222788
+url: https://jawlik.shinyapps.io/capstone/
+when: 1518618073.50017
+asMultiple: FALSE
+asStatic: FALSE

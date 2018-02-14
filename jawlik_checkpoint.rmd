@@ -1,0 +1,124 @@
+---
+title: "jawlik_checkpoint"
+author: "Matthew A Jawlik"
+date: "11/23/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Jawlik Milestone Report
+
+This is jawlik's milestone report for the Coursera Capstone project.  I chose to use the quantera package after having difficulties installing rjava and RWeka packages.  In the end, the quantera package proved exceedingly simple to use.
+
+
+
+## Setting up the Environment and downloading data 
+
+```{r, warning=FALSE, message=FALSE}
+library(stringr)
+library(plyr)
+library(tm)
+library(quanteda)
+library(wordcloud)
+library(tokenizers)
+
+temp <- tempfile()
+download.file("https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip",temp)
+fns <- unzip(temp, junkpaths = TRUE, exdir = tempdir())
+# Read in just the three English text files
+us_twitter <- readLines(fns[7])
+us_news <- readLines(fns[8])
+us_blog <- readLines(fns[9])
+```
+
+
+
+## Exploratory Data Analysis
+
+Perform some initial summary of the complete datasets:
+
+```{r, warning=FALSE, message=FALSE}
+summ <- data.frame(
+  fileName = c("us_twitter", "us_news", "us_blog"),
+  records = c(length(us_twitter), length(us_news), length(us_blog)),
+  minCharacters = c(min(nchar(us_twitter)), min(nchar(us_news)), min(nchar(us_blog))),
+  maxCharacters = c(max(nchar(us_twitter)), max(nchar(us_news)), max(nchar(us_blog))),
+  maxWords = c(max(str_count(us_twitter, "\\S+")), max(str_count(us_news, "\\S+")),
+               max(str_count(us_blog, "\\S+"))),
+  avgWords = c(mean(str_count(us_twitter, "\\S+")), mean(str_count(us_news, "\\S+")),
+               mean(str_count(us_blog, "\\S+"))),
+  medianWords = c(median(str_count(us_twitter, "\\S+")),
+                  median(str_count(us_news,"\\S+")), median(str_count(us_blog, "\\S+")))
+)
+summ
+
+```
+
+### Perform deeper analysis
+Take a sample of 10,000 records from each file, remove whitespace and convert to lowercase
+```{r, warning=FALSE, message=FALSE}
+set.seed(999)
+samp <- c(sample(us_twitter, 10000), sample(us_news, 10000),sample(us_blog,10000))
+samp <- trimws(samp)
+samp <- tolower(samp)
+```
+
+#### Tokenize words
+Create unigrams, bigrams and trigrams using quanteda package (per instructions here:
+https://cran.r-project.org/web/packages/quanteda/vignettes/quickstart.html).  
+
+At first run, I realized the top results were various forms of punctuation, so we are  cleaning the data further by removing punctuation and stopwords. 
+```{r, warning=FALSE, message=FALSE}
+unigrams <- dfm(samp, remove = stopwords("en"), remove_punct = TRUE, 
+                ngrams = 1, verbose = FALSE)
+bigrams <- dfm(samp, remove = stopwords("en"), remove_punct = TRUE,
+               ngrams = 2, verbose = FALSE)
+trigrams <- dfm(samp, remove = stopwords("en"), remove_punct = TRUE,
+                ngrams = 3, verbose = FALSE)
+```
+
+#### Look at most frequent unigrams, bigrams and trigrams
+```{r, warning=FALSE, message=FALSE}
+topfeatures(unigrams, 15)
+topfeatures(bigrams, 15)
+topfeatures(trigrams, 15)
+```
+
+#### Create barplots and wordclouds of most frequent ngrams
+
+Unigrams
+```{r, warning=FALSE, message=FALSE}
+top_uni <- topfeatures(unigrams, 15)
+barplot(top_uni, main = 'Top Unigrams', xlab = 'Grams', ylab = 'Sample Count', axes = T,
+        axisnames = T, las = 2)
+textplot_wordcloud(unigrams, min.freq = 1000, random.order = FALSE, rot.per = .25, 
+                   colors = RColorBrewer::brewer.pal(8,"Dark2"))
+```
+
+Bigrams
+```{r, warning=FALSE, message=FALSE}
+top_bi <- topfeatures(bigrams, 15)
+barplot(top_bi, main = 'Top Bigrams', xlab = 'Grams', ylab = 'Sample Count', axes = T,
+        axisnames = T, las = 2)
+textplot_wordcloud(bigrams, min.freq = 500, random.order = FALSE, rot.per = .25, 
+                   colors = RColorBrewer::brewer.pal(8,"Dark2"))
+```
+
+Trigrams
+```{r, warning=FALSE, message=FALSE}
+top_tri <- topfeatures(trigrams, 15)
+barplot(top_tri, main = 'Top Trigrams', xlab = 'Grams', ylab = 'Sample Count', axes = T,
+        axisnames = T, las = 2)
+textplot_wordcloud(trigrams, min.freq = 50, random.order = FALSE, rot.per = .25, 
+                   colors = RColorBrewer::brewer.pal(8,"Dark2"))
+```
+
+
+
+## Next Steps for Modeling
+I haven't been able to get the tokens() function working with corpus, which I would like to do.  I'll spend a bit more time on this, but after losing hours trying to get rJava and RWeka to install (without success) I may just move forward with the prediction algorithm.
+
+For this algorithm, I plan on training on a dataset of half of the english data and testing on the remainder.  The algorithm will attempt to predict the next word by matching existing typed words against the dictionary and offering the most likely options.   

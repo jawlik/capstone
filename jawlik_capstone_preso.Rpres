@@ -15,7 +15,7 @@ Using a large sample of actual written language, develop an algorithm predicting
 
 Shiny app:  <https://jawlik.shinyapps.io/capstone/>.
 
-R Code and documentation:
+R Code and documentation: <https://github.com/jawlik/capstone>
 
 
 Solution Direction / Algorithm
